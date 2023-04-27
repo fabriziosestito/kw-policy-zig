@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  release:
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: "0.10.1"
+      - name: Check formatting
+        run: make fmt 
+      - name: Run tests
+        run: make test 
+  
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: "0.10.1"
+      - name: Build
+        run: make 
+      - name: Install kwctl
+        uses: kubewarden/github-actions/kwctl-installer@v3.1.3
+      - name: Annotate policy
+        run: make annotated-policy.wasm 
+      - name: Upload wasm artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: policy
+          path: |
+            policy.wasm
+            annotated-policy.wasm
+
+  e2e-tests:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download wasm artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: policy
+      - name: ls -la
+        run: ls -la
+      - name: Install kwctl
+        uses: kubewarden/github-actions/kwctl-installer@v3.1.3
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.9.0
+      - name: Run E2E tests
+        run: make e2e-tests
+
+  push-to-registry:
+    name: Push policy to registry
+    if: github.event_name == 'release' || (github.event_name == 'push' && github.ref_name == 'main') 
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    permissions:
+      contents: read
+      packages: write
+    env:
+      TAG: "${{ (github.event_name == 'release' && github.event.release.tag_name) || (github.event_name == 'push' && github.ref_name == 'main' && 'dev') }}"
+    steps:
+      - name: Download wasm artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: policy
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install kwctl
+        uses: kubewarden/github-actions/kwctl-installer@v3.1.3           
+      - name: Push policy
+        run:
+          kwctl push annotated-policy.wasm ghcr.io/${{ github.repository_owner }}/kw-policy-zig:${{ env.TAG }}

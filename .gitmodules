@@ -1,0 +1,3 @@
+[submodule "deps/wapc-guest-zig"]
+	path = deps/wapc-guest-zig
+	url = git@github.com:fabriziosestito/wapc-guest-zig

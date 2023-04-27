@@ -1,0 +1,21 @@
+rules:
+- apiGroups: [""]
+  apiVersions: ["v1"]
+  resources: ["pods"]
+  operations: ["CREATE", "UPDATE"]
+mutating: false
+contextAware: false
+executionMode: kubewarden-wapc
+annotations:
+  # artifacthub specific:
+  io.artifacthub.displayName: kw-policy-zig
+  io.artifacthub.resources: Pod
+  io.artifacthub.keywords: pod, cool policy, kubewarden, zig, poc
+  io.kubewarden.policy.ociUrl: ghcr.io/fabriziosestito/testpolicy  
+  # kubewarden specific:
+  io.kubewarden.policy.title: kw-policy-zig
+  io.kubewarden.policy.description: A policy written in Zig
+  io.kubewarden.policy.author: Fabrizio Sestito
+  io.kubewarden.policy.url: https://github.com/fabriziosestito/kw-policy-zig
+  io.kubewarden.policy.source: https://github.com/yourorg/kw-policy-zig
+  io.kubewarden.policy.license: Apache-2.0

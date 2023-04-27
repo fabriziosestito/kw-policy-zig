@@ -1,0 +1,27 @@
+{
+  "uid": "1299d386-525b-4032-98ae-1949f69f9cfc",
+  "kind": {
+    "group": "core",
+    "kind": "Pod",
+    "version": "v1"
+  },
+  "object": {
+    "apiVersion": "core/v1",
+    "kind": "Pod",
+    "metadata": {
+      "name": "bad-name",
+      "namespace": "some-namespace",
+      "labels": {
+        "env": "production"
+      }
+    },
+    "spec": {
+      "containers": [
+        {
+          "name": "nginx",
+          "image": "nginx:latest"
+        }
+      ]
+    }
+  }
+}
