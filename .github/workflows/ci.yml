@@ -18,10 +18,10 @@ jobs:
         with:
           version: "0.10.1"
       - name: Check formatting
-        run: make fmt 
+        run: make fmt
       - name: Run tests
-        run: make test 
-  
+        run: make test
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -35,11 +35,11 @@ jobs:
         with:
           version: "0.10.1"
       - name: Build
-        run: make 
+        run: make
       - name: Install kwctl
         uses: kubewarden/github-actions/kwctl-installer@v3.1.3
       - name: Annotate policy
-        run: make annotated-policy.wasm 
+        run: make annotated-policy.wasm
       - name: Upload wasm artifact
         uses: actions/upload-artifact@v2
         with:
@@ -71,7 +71,7 @@ jobs:
 
   push-to-registry:
     name: Push policy to registry
-    if: github.event_name == 'release' || (github.event_name == 'push' && github.ref_name == 'main') 
+    if: github.event_name == 'release' || (github.event_name == 'push' && github.ref_name == 'main')
     runs-on: ubuntu-latest
     needs: e2e-tests
     permissions:
@@ -91,7 +91,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install kwctl
-        uses: kubewarden/github-actions/kwctl-installer@v3.1.3           
+        uses: kubewarden/github-actions/kwctl-installer@v3.1.3
       - name: Push policy
-        run:
-          kwctl push annotated-policy.wasm ghcr.io/${{ github.repository_owner }}/kw-policy-zig:${{ env.TAG }}
+        run: kwctl push annotated-policy.wasm ghcr.io/${{ github.repository_owner }}/kw-policy-zig:${{ env.TAG }}
