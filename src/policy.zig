@@ -4,7 +4,7 @@ const mem = std.mem;
 const k8s = @import("k8s.zig");
 
 pub const Settings = struct { invalid_names: []const []const u8 };
-pub const SettingsValidationResponse = struct { valid: bool, message: []const u8 };
+pub const SettingsValidationResponse = struct { valid: bool, message: ?[]const u8 = null };
 
 pub const ValidationRequest = struct { request: k8s.KubernetesAdmissionRequest, settings: Settings };
 pub const ValidationResponse = struct { accepted: bool };
@@ -24,10 +24,10 @@ pub fn validateSettings(allocator: mem.Allocator, payload: []u8) !?[]u8 {
     const parse_options = .{ .allocator = allocator };
     const settings = try json.parse(Settings, &stream, parse_options);
 
-    var response = SettingsValidationResponse{ .valid = true, .message = "" };
+    var response = SettingsValidationResponse{ .valid = true };
     if (settings.invalid_names.len == 0) {
         response.valid = false;
-        response.message = "No invalid name specified. Specify at least one invalid name to match";
+        response.message = "No invalid name specified. Specify at least one invalid name to match.";
     }
     var buffer = std.ArrayList(u8).init(allocator);
     try json.stringify(response, .{}, buffer.writer());
