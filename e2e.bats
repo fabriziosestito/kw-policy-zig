@@ -44,4 +44,5 @@
   # request rejected
   [ "$status" -eq 0 ]
   [ $(expr "$output" : '.*allowed.*false*') -ne 0 ]
+  [ $(expr "$output" : '.*Pod name: bad-name is not accepted.*') -ne 0 ]
 }

@@ -7,7 +7,7 @@ pub const Settings = struct { invalid_names: []const []const u8 };
 pub const SettingsValidationResponse = struct { valid: bool, message: ?[]const u8 = null };
 
 pub const ValidationRequest = struct { request: k8s.KubernetesAdmissionRequest, settings: Settings };
-pub const ValidationResponse = struct { accepted: bool };
+pub const ValidationResponse = struct { accepted: bool, message: ?[]const u8 = null };
 
 /// Return the protocol version
 pub fn protocolVersion(allocator: mem.Allocator, _: []u8) !?[]u8 {
@@ -48,6 +48,7 @@ pub fn validate(allocator: mem.Allocator, payload: []u8) !?[]u8 {
         for (req.settings.invalid_names) |invalid_name| {
             if (std.mem.eql(u8, req.request.object.metadata.name, invalid_name)) {
                 resp.accepted = false;
+                resp.message = try std.fmt.allocPrint(allocator, "Pod name: {s} is not accepted.", .{invalid_name});
                 break;
             }
         }
