@@ -6,7 +6,7 @@ policy.wasm: $(SOURCE) $(DEPS) build.zig
 	cp ./zig-out/lib/kw-policy-zig.wasm policy.wasm
 
 annotated-policy.wasm: policy.wasm metadata.yml
-	kwctl annotate -m metadata.yml -o annotated-policy.wasm policy.wasm
+	kwctl annotate -m metadata.yml -u README.md -o annotated-policy.wasm policy.wasm
 
 .PHONY: fmt
 fmt:
