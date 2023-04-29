@@ -29,6 +29,7 @@ pub fn validateSettings(allocator: mem.Allocator, payload: []u8) !?[]u8 {
         response.valid = false;
         response.message = "No invalid name specified. Specify at least one invalid name to match.";
     }
+
     var buffer = std.ArrayList(u8).init(allocator);
     try json.stringify(response, .{}, buffer.writer());
 
@@ -38,24 +39,24 @@ pub fn validateSettings(allocator: mem.Allocator, payload: []u8) !?[]u8 {
 /// Validate theKubernetesAdmissionRequest payload
 /// Returns a ValidationResponse with accepted set to true if the request is accepted
 pub fn validate(allocator: mem.Allocator, payload: []u8) !?[]u8 {
-    var resp = ValidationResponse{ .accepted = true };
+    var response = ValidationResponse{ .accepted = true };
     var stream = json.TokenStream.init(payload);
     const parse_options = .{ .allocator = allocator, .ignore_unknown_fields = true };
-    const req = try json.parse(ValidationRequest, &stream, parse_options);
-    defer json.parseFree(ValidationRequest, req, parse_options);
+    const request = try json.parse(ValidationRequest, &stream, parse_options);
+    defer json.parseFree(ValidationRequest, request, parse_options);
 
-    if (std.mem.eql(u8, req.request.kind.version, "v1") and std.mem.eql(u8, req.request.kind.kind, "Pod")) {
-        for (req.settings.invalid_names) |invalid_name| {
-            if (std.mem.eql(u8, req.request.object.metadata.name, invalid_name)) {
-                resp.accepted = false;
-                resp.message = try std.fmt.allocPrint(allocator, "Pod name: {s} is not accepted.", .{invalid_name});
+    if (std.mem.eql(u8, request.request.kind.version, "v1") and std.mem.eql(u8, request.request.kind.kind, "Pod")) {
+        for (request.settings.invalid_names) |invalid_name| {
+            if (std.mem.eql(u8, request.request.object.metadata.name, invalid_name)) {
+                response.accepted = false;
+                response.message = try std.fmt.allocPrint(allocator, "Pod name: {s} is not accepted.", .{invalid_name});
                 break;
             }
         }
     }
 
     var buffer = std.ArrayList(u8).init(allocator);
-    try json.stringify(resp, .{}, buffer.writer());
+    try json.stringify(response, .{}, buffer.writer());
 
     return buffer.items;
 }
