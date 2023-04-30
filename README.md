@@ -30,7 +30,7 @@ kind: ClusterAdmissionPolicy
 metadata:
   name: kw-policy-zig
 spec:
-  module: registry://ghcr.io/fabriziosestito/kw-policy-zig:0.1.0
+  module: registry://ghcr.io/fabriziosestito/kw-policy-zig:v0.1.0
   settings:
     invalid_names:
       - bad-name
@@ -97,7 +97,7 @@ make annotated-policy.wasm
 Push the policy to a registry:
 
 ```
-kwctl push annotated-policy.wasm ghcr.io/fabriziosestito/kw-policy-zig:0.1.0
+kwctl push annotated-policy.wasm ghcr.io/fabriziosestito/kw-policy-zig:v0.1.0
 ```
 
 # Testing
